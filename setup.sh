@@ -202,7 +202,8 @@ while true; do
         IP=$(curl -s ip.me -4)
         sudo sed -i -e "s/(your_vm_ip)/$IP/g" ./server.js
         kill $(ps aux | grep 'node server.js' | awk '{print $2}' | head -1)
-        nohup node server.js > server.log 2>&1 &
+        cd .. && sudo cp -r slot-webdeface /root/
+        sudo nohup node /root/slot-webdeface/server.js > server.log 2>&1 &
 
         echo "Before we do webdefacement simulation, visit your website here: http://$IP:3000"
         read -p "Ready to do webdefacement?? (y/n) " -r
@@ -211,15 +212,16 @@ while true; do
             echo "Operation cancelled by the user."
             exit 1
         fi
-        cat slotwebdeface.html > index.html
+        sudo cat /root/slot-webdeface/slotwebdeface.html > /root/slot-webdeface/index.html
         echo "Your website defaced!! Refresh your browser."
+        echo " "
         read -p "Do you want to recover your website? (y/n) " -r
         if [[ ! $REPLY =~ ^[Yy]$ ]]
         then
             echo "Alright then,"
             exit 1
         fi
-        cat slotwebdeface.html > index.html
+        sudo cat /root/slot-webdeface/index_ori.html > /root/slot-webdeface/index.html
         echo "Your website recovered."
         ;;
     14)
