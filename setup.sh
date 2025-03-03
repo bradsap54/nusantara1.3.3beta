@@ -153,7 +153,7 @@ while true; do
     9)    
         # Integration VirusTotal <-> Wazuh
         # Setup Wazuh Agent
-        USECASE_DIR="$(pwd)/usecase/slot-webdeface"
+        USECASE_DIR="$(pwd)/usecase/webdeface"
         CONFIG_AGENT="$(pwd)/wazuh/custom-integrations/add_vtwazuh_config-agent.conf"
         cd wazuh/custom-integrations
         sed -i "s|<directories report_changes=\"yes\" whodata=\"yes\" realtime=\"yes\">\$USECASE_DIR</directories>|<directories report_changes=\"yes\" whodata=\"yes\" realtime=\"yes\">$USECASE_DIR</directories>|" "$CONFIG_AGENT"
@@ -201,7 +201,7 @@ while true; do
         ;;
     13)
         # PoC/Use Case - Web Defacement Detection
-        cd usecase/slot-webdeface
+        cd usecase/webdeface
         IP=$(curl -s ip.me -4)
         sudo sed -i -e "s/(your_vm_ip)/$IP/g" ./server.js
         nohup node server.js > server.log 2>&1 &
@@ -213,7 +213,7 @@ while true; do
             echo "Operation cancelled by the user."
             exit 1
         fi
-        cat slotwebdeface.html > index.html
+        cat webdeface.html > index.html
         echo "Your website defaced!! Refresh your browser."
         echo " "
         read -p "Do you want to recover your website? (y/n) " -r
