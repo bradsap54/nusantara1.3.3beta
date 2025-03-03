@@ -218,7 +218,7 @@ while true; do
         read -p "Do you want to recover your website? (y/n) " -r
         if [[ ! $REPLY =~ ^[Yy]$ ]]
         then
-            echo "Alright then,"
+            echo "Alright then."
             exit 1
         fi
         sudo cat /root/slot-webdeface/index_ori.html > /root/slot-webdeface/index.html
