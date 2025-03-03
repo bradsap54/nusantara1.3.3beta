@@ -16,7 +16,7 @@ while true; do
                     "12" "PoC/Use Case - Malware Detection & Response" \
                     "13" "PoC/Use Case - Web Defacement Detection" \
                     "14" "Show Module (Docker) Status" 3>&1 1>&2 2>&3)
-    # Script version 1.0 updated 15 November 2023
+    # Script version 2.0 updated 3 Maret 2025
     # Depending on the chosen option, execute the corresponding command
     case $OPTION in
     1)
