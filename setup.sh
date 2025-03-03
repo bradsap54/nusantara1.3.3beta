@@ -166,7 +166,7 @@ while true; do
         echo "VirusTotal API Key:"
         read VT_API_KEY
         sed -i "s|<api_key>.*</api_key>|<api_key>$VT_API_KEY</api_key>|" "add_vtwazuh_config-server.conf"
-        cat add_vtwazuh_config.conf >> ../config/wazuh_cluster/wazuh_manager.conf
+        cat add_vtwazuh_config-server.conf >> ../config/wazuh_cluster/wazuh_manager.conf
         cat add_vtwazuh_rules.xml >> local_rules.xml
         sudo cp local_rules.xml /var/lib/docker/volumes/wazuh_wazuh_etc/_data/rules/local_rules.xml
         sudo docker exec -ti wazuh-wazuh.manager-1 chown wazuh:wazuh /var/ossec/etc/rules/local_rules.xml
