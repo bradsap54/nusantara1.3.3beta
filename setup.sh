@@ -201,7 +201,7 @@ while true; do
         cd usecase/slot-webdeface
         IP=$(curl -s ip.me -4)
         sudo sed -i -e "s/(your_vm_ip)/$IP/g" ./server.js
-        kill $(ps aux | grep 'node server.js' | awk '{print $2}' | head -1)
+        kill $(ps aux | grep 'server.js' | awk '{print $2}' | head -1)
         cd .. && sudo cp -r slot-webdeface /root/
         sudo bash -c "nohup node /root/slot-webdeface/server.js > server.log 2>&1 &"
 
