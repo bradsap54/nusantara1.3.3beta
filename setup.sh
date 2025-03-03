@@ -153,7 +153,10 @@ while true; do
     9)    
         # Integration VirusTotal <-> Wazuh
         # Setup Wazuh Agent
+        USECASE_DIR="$(pwd)/usecase/slot-webdeface"
+        CONFIG_AGENT="$(pwd)/wazuh/custom-integrations/add_vtwazuh_config-agent.conf"
         cd wazuh/custom-integrations
+        sed -i "s|<directories report_changes=\"yes\" whodata=\"yes\" realtime=\"yes\">\$USECASE_DIR</directories>|<directories report_changes=\"yes\" whodata=\"yes\" realtime=\"yes\">$USER_DIR</directories>|" "$CONFIG_AGENT"
         sudo bash -c "cat add_vtwazuh_config-agent.conf >> /var/ossec/etc/ossec.conf"
         sudo apt update
         sudo apt -y install jq
@@ -198,12 +201,9 @@ while true; do
         ;;
     13)
         # PoC/Use Case - Web Defacement Detection
-        kill $(ps aux | grep 'server.js' | awk '{print $2}' | head -1)
         cd usecase/slot-webdeface
         IP=$(curl -s ip.me -4)
         sudo sed -i -e "s/(your_vm_ip)/$IP/g" ./server.js
-        cd .. && sudo cp -r slot-webdeface /root/
-        sudo su && cd /root/slot-webdeface
         nohup node server.js > server.log 2>&1 &
 
         echo "Before we do webdefacement simulation, visit your website here: http://$IP:3000"
@@ -224,6 +224,15 @@ while true; do
         fi
         cat index_ori.html > index.html
         echo "Your website recovered."
+        echo " "
+        read -p "Do you want to shut off your website? (y/n) " -r
+        if [[ ! $REPLY =~ ^[Yy]$ ]]
+        then
+            echo "OK. Your website is still up and running."
+            exit 1
+        fi
+        kill $(ps aux | grep 'server.js' | awk '{print $2}' | head -1)
+        echo "Your website off."
         ;;
     14)
         sudo docker ps
