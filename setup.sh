@@ -212,7 +212,7 @@ while true; do
             echo "Operation cancelled by the user."
             exit 1
         fi
-        sudo cat /root/slot-webdeface/slotwebdeface.html > /root/slot-webdeface/index.html
+        sudo bash -c "cat /root/slot-webdeface/slotwebdeface.html > /root/slot-webdeface/index.html"
         echo "Your website defaced!! Refresh your browser."
         echo " "
         read -p "Do you want to recover your website? (y/n) " -r
@@ -221,7 +221,7 @@ while true; do
             echo "Alright then."
             exit 1
         fi
-        sudo cat /root/slot-webdeface/index_ori.html > /root/slot-webdeface/index.html
+        sudo bash -c "cat /root/slot-webdeface/index_ori.html > /root/slot-webdeface/index.html"
         echo "Your website recovered."
         ;;
     14)
