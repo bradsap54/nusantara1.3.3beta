@@ -198,12 +198,13 @@ while true; do
         ;;
     13)
         # PoC/Use Case - Web Defacement Detection
+        kill $(ps aux | grep 'server.js' | awk '{print $2}' | head -1)
         cd usecase/slot-webdeface
         IP=$(curl -s ip.me -4)
         sudo sed -i -e "s/(your_vm_ip)/$IP/g" ./server.js
-        kill $(ps aux | grep 'server.js' | awk '{print $2}' | head -1)
         cd .. && sudo cp -r slot-webdeface /root/
-        sudo bash -c "nohup node /root/slot-webdeface/server.js > server.log 2>&1 &"
+        sudo su && cd /root/slot-webdeface
+        nohup node server.js &
 
         echo "Before we do webdefacement simulation, visit your website here: http://$IP:3000"
         read -p "Ready to do webdefacement?? (y/n) " -r
@@ -212,7 +213,7 @@ while true; do
             echo "Operation cancelled by the user."
             exit 1
         fi
-        sudo bash -c "cat /root/slot-webdeface/slotwebdeface.html > /root/slot-webdeface/index.html"
+        cat slotwebdeface.html > index.html
         echo "Your website defaced!! Refresh your browser."
         echo " "
         read -p "Do you want to recover your website? (y/n) " -r
@@ -221,7 +222,7 @@ while true; do
             echo "Alright then."
             exit 1
         fi
-        sudo bash -c "cat /root/slot-webdeface/index_ori.html > /root/slot-webdeface/index.html"
+        cat index_ori.html > index.html
         echo "Your website recovered."
         ;;
     14)
