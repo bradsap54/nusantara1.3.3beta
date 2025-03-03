@@ -1,7 +1,7 @@
 #!/bin/bash
 
 while true; do
-    OPTION=$(whiptail --title "T-GUARD INSTALLER" --menu "Choose an option:" 20 70 13 \
+    OPTION=$(whiptail --title "T-GUARD INSTALLER" --menu "Choose an option:" 23 70 15 \
                     "1" "Update System and Install Prerequisites" \
                     "2" "Install Docker" \
                     "3" "Install Wazuh (SIEM) & Deploy Agent" \
