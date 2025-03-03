@@ -154,10 +154,10 @@ while true; do
         # Integration VirusTotal <-> Wazuh
         # Setup Wazuh Agent
         cd wazuh/custom-integrations
-        sudo cat add_vtwazuh_config-agent.conf >> /var/ossec/etc/ossec.conf
+        sudo bash -c "cat add_vtwazuh_config-agent.conf >> /var/ossec/etc/ossec.conf"
         sudo apt update
         sudo apt -y install jq
-        sudo cp $(pwd)/wazuh/custom-integrations/remove-threat.sh /var/ossec/active-response/bin/
+        sudo cp remove-threat.sh /var/ossec/active-response/bin/
         sudo chmod 750 /var/ossec/active-response/bin/remove-threat.sh
         sudo chown root:wazuh /var/ossec/active-response/bin/remove-threat.sh
         sudo systemctl restart wazuh-agent
