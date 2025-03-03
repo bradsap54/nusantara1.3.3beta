@@ -203,7 +203,7 @@ while true; do
         sudo sed -i -e "s/(your_vm_ip)/$IP/g" ./server.js
         kill $(ps aux | grep 'node server.js' | awk '{print $2}' | head -1)
         cd .. && sudo cp -r slot-webdeface /root/
-        sudo nohup node /root/slot-webdeface/server.js > server.log 2>&1 &
+        sudo bash -c "nohup node /root/slot-webdeface/server.js > server.log 2>&1 &"
 
         echo "Before we do webdefacement simulation, visit your website here: http://$IP:3000"
         read -p "Ready to do webdefacement?? (y/n) " -r
