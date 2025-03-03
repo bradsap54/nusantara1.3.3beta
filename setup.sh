@@ -153,6 +153,8 @@ while true; do
     9)    
         # Integration VirusTotal <-> Wazuh
         # Setup Wazuh Agent
+        cd wazuh/custom-integrations
+        sudo cat add_vtwazuh_config-agent.conf >> /var/ossec/etc/ossec.conf
         sudo apt update
         sudo apt -y install jq
         sudo cp $(pwd)/wazuh/custom-integrations/remove-threat.sh /var/ossec/active-response/bin/
@@ -161,10 +163,9 @@ while true; do
         sudo systemctl restart wazuh-agent
 
         # Setup Wazuh Server
-        cd /wazuh/custom-integrations
         echo "VirusTotal API Key:"
         read VT_API_KEY
-        sed -i "s|<api_key>.*</api_key>|<api_key>$VT_API_KEY</api_key>|" "add_vtwazuh_config.conf"
+        sed -i "s|<api_key>.*</api_key>|<api_key>$VT_API_KEY</api_key>|" "add_vtwazuh_config-server.conf"
         cat add_vtwazuh_config.conf >> ../config/wazuh_cluster/wazuh_manager.conf
         cat add_vtwazuh_rules.xml >> local_rules.xml
         sudo cp local_rules.xml /var/lib/docker/volumes/wazuh_wazuh_etc/_data/rules/local_rules.xml
@@ -174,12 +175,12 @@ while true; do
         ;;
     10)
         # Integration Shuffle <-> Wazuh
-        cd /wazuh/custom-integrations
+        cd wazuh/custom-integrations
         echo "Shuffle Hook URL:"
         read SHUFFLE_URL
         sed -i "s|<hook_url>.*</hook_url>|<hook_url>$SHUFFLE_URL</hook_url>|" "add_shufflewazuh_config.conf"
         cat add_shufflewazuh_config.conf >> ../config/wazuh_cluster/wazuh_manager.conf
-        cd .. $$ sudo docker compose restart
+        cd .. && sudo docker compose restart
         ;;
     11)    
         # PoC/Use Case - Brute Force Detection
