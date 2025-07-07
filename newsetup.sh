@@ -353,19 +353,13 @@ poc_menu() {
                     # --- PoC: Brute Force Detection ---
                     echo -e "\n\e[1;36m--- Simulating SSH Brute Force Attack --- \e[0m"
                     
-                    # Check if the IP_ADDRESS variable from Step 2 exists
-                    if [ -z "$IP_ADDRESS" ]; then
-                        echo -e "\e[1;31m[ERROR] IP Address not set. Please run Step 2 (Install T-Guard SOC Package) first.\e[0m"
-                        break
-                    fi
-
                     echo -e "\e[1;34m[INFO] This will simulate 10 failed login attempts to trigger Wazuh alerts.\e[0m"
                     echo
                     echo -e "\e[1;34m[INFO] Target IP Address: $IP_ADDRESS\e[0m"
                     for i in $(seq 1 10); do
                         echo "Simulating Brute Force: Attempt $i..."
                         # BatchMode=yes prevents password prompts, ensuring the attempt fails automatically
-                        ssh -o BatchMode=yes -o ConnectTimeout=5 "fakeuser@$IP_ADDRESS" &>/dev/null
+                        ssh -o BatchMode=yes -o ConnectTimeout=5 "fakeuser@$IP_ADDRESS"
                         sleep 1
                     done
                     
