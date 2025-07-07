@@ -355,6 +355,7 @@ poc_menu() {
                     
                     echo -e "\e[1;34m[INFO] This will simulate 10 failed login attempts to trigger Wazuh alerts.\e[0m"
                     echo
+                    ssh fakeuser@$IP_ADDRESS
                     echo -e "\e[1;34m[INFO] Target IP Address: $IP_ADDRESS\e[0m"
                     for i in $(seq 1 10); do
                         echo "Simulating Brute Force: Attempt $i..."
