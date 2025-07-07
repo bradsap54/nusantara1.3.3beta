@@ -164,6 +164,14 @@ while true; do
         sudo chmod 750 /var/ossec/active-response/bin/remove-threat.sh
         sudo chown root:wazuh /var/ossec/active-response/bin/remove-threat.sh
         sudo systemctl restart wazuh-agent
+        # Server Setup
+        echo -n "Please enter your VirusTotal API Key: "
+        read -r VT_API_KEY
+        CONFIG_SERVER_SNIPPET="$(pwd)/wazuh/custom-integrations/add_vtwazuh_config-server.conf"
+        sed -i "s|<api_key>.*</api_key>|<api_key>$VT_API_KEY</api_key>|" "$CONFIG_SERVER_SNIPPET"
+        cat "$CONFIG_SERVER_SNIPPET" >> "$(pwd)/wazuh/config/wazuh_cluster/wazuh_manager.conf"
+        cat wazuh/custom-integrations/add_vtwazuh_rules.xml >> wazuh/custom-integrations/final_local_rules.xml
+        echo -e "\e[1;32m✅ VirusTotal configuration staged.\e[0m"
 
         # Setup Wazuh Server
         echo "VirusTotal API Key:"
