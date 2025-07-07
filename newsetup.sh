@@ -46,7 +46,7 @@ install_module() {
     # Ask the user for the network environment just once.
     echo "Please select the network environment for this installation."
     PS3=$'\nChoose an option: '
-    select network_env in "Private Network (local VM: VirtualBox, VMware, etc.)" "Public Network (cloud server: GCP, AWS, Azure, etc.)"; do
+    select network_env in "Private Network (local VM: VirtualBox, VMware, etc.)" "Public Network (cloud server: GCP, AWS, Azure, etc.)" "Back"; do
         case $REPLY in
             1)
                 # Get the primary private IP address
@@ -61,6 +61,10 @@ install_module() {
                 echo
                 echo -e "\e[1;34m[INFO] Public IP Address:\e[1;33m $IP_ADDRESS\e[0m"
                 break
+                ;;
+            3)
+                echo "back to main menu..."
+                return # Exits the function and goes back to the main script menu
                 ;;
             *)
                 echo "Invalid option. Please try again."
