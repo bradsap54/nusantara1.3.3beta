@@ -265,7 +265,7 @@ integrate_module() {
     echo -n "Please enter your IRIS API Key: "
     read -r API_KEY
     sed -i "s|<api_key>.*</api_key>|<api_key>$API_KEY</api_key>|" "$CONFIG_FILE"
-    sudo docker exec -i iris-web-iris_db-1 psql -U iris -d iris_db -c "INSERT INTO user_client (id, user_id, client_id, access_level, allow_alerts) VALUES (1, 1, 1, 4, 't') ON CONFLICT (id) DO NOTHING;"
+    sudo docker exec -i iriswebapp_db psql -U iris -d iris_db -c "INSERT INTO user_client (id, user_id, client_id, access_level, allow_alerts) VALUES (1, 1, 1, 4, 't') ON CONFLICT (id) DO NOTHING;"
     sudo cp wazuh/custom-integrations/custom-iris.py /var/lib/docker/volumes/wazuh_wazuh_integrations/_data/custom-iris.py
     sudo docker exec -i wazuh-wazuh.manager-1 chown root:wazuh /var/ossec/integrations/custom-iris.py
     sudo docker exec -i wazuh-wazuh.manager-1 chmod 750 /var/ossec/integrations/custom-iris.py
