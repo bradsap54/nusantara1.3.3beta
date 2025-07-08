@@ -19,9 +19,13 @@ update_install_pre() {
     echo
     echo -e "\e[1;32m -- Step 1: Update System and Install Prerequisites -- \e[0m"
     echo
+    echo -e "\e[1;36m--> Updating System and Install Prerequisites...\e[0m"
+    echo
     sudo apt-get update -y
     sudo apt-get upgrade -y
     sudo apt-get install wget curl nano git unzip nodejs -y
+    echo
+    echo -e "\e[1;36m--> Installing Docker...\e[0m"
     echo
     # Check if Docker is installed
         if command -v docker > /dev/null; then
