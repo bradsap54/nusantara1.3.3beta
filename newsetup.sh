@@ -271,70 +271,65 @@ integrate_module() {
     sed -i "s|<api_key>.*</api_key>|<api_key>$API_KEY</api_key>|" "$CONFIG_FILE"
     sudo docker exec -i iriswebapp_db psql -U postgres -d iris_db -c "INSERT INTO user_client (id, user_id, client_id, access_level, allow_alerts) VALUES (1, 1, 1, 4, 't');"
     sudo cp wazuh/custom-integrations/custom-iris.py /var/lib/docker/volumes/wazuh_wazuh_integrations/_data/custom-iris.py
-    sudo docker exec -i wazuh-wazuh.manager-1 chown root:wazuh /var/ossec/integrations/custom-iris.py
-    sudo docker exec -i wazuh-wazuh.manager-1 chmod 750 /var/ossec/integrations/custom-iris.py
-    sudo docker exec -i wazuh-wazuh.manager-1 /var/ossec/framework/python/bin/pip3 install requests
-    echo -e "\e[1;32m IRIS configuration complete.\e[0m"
+    sudo docker exec -ti wazuh-wazuh.manager-1 chown root:wazuh /var/ossec/integrations/custom-iris.py
+    sudo docker exec -ti wazuh-wazuh.manager-1 chmod 750 /var/ossec/integrations/custom-iris.py
+    sudo docker exec -ti wazuh-wazuh.manager-1 yum install python3-pip -y
+    sudo docker exec -ti wazuh-wazuh.manager-1 pip3 install requests
+    cd wazuh && sudo docker compose restart && cd ..
+    echo -e "\e[1;32m IRIS-Wazuh integration complete.\e[0m"
     echo
 
     # --- 2. MISP <-> Wazuh Integration ---
     echo -e "\n\e[1;36m--- Configuring MISP <-> Wazuh --- \e[0m"
     sudo cp wazuh/custom-integrations/custom-misp.py /var/lib/docker/volumes/wazuh_wazuh_integrations/_data/custom-misp.py
-    sudo docker exec -i wazuh-wazuh.manager-1 chown root:wazuh /var/ossec/integrations/custom-misp.py
-    sudo docker exec -i wazuh-wazuh.manager-1 chmod 750 /var/ossec/integrations/custom-misp.py
-    # This rules file will be appended to by the VirusTotal step before being copied
-    cp wazuh/custom-integrations/local_rules.xml wazuh/custom-integrations/final_local_rules.xml
-    echo -e "\e[1;32m MISP configuration complete.\e[0m"
+    sudo docker exec -ti wazuh-wazuh.manager-1 chown root:wazuh /var/ossec/integrations/custom-misp.py
+    sudo docker exec -ti wazuh-wazuh.manager-1 chmod 750 /var/ossec/integrations/custom-misp.py
+    sudo cp wazuh/custom-integrations/local_rules.xml /var/lib/docker/volumes/wazuh_wazuh_etc/_data/rules/local_rules.xml
+    sudo docker exec -ti wazuh-wazuh.manager-1 chown wazuh:wazuh /var/ossec/etc/rules/local_rules.xml
+    sudo docker exec -ti wazuh-wazuh.manager-1 chmod 550 /var/ossec/etc/rules/local_rules.xml
+    cd wazuh && sudo docker compose restart && cd ..
+    echo -e "\e[1;32m MISP-Wazuh integration complete.\e[0m"
     echo
 
     # --- 3. VirusTotal <-> Wazuh Integration ---
     echo -e "\n\e[1;36m--- Configuring VirusTotal <-> Wazuh --- \e[0m"
     # Agent Setup
     USECASE_DIR="$(pwd)/usecase/webdeface"
-    CONFIG_AGENT_SNIPPET="$(pwd)/wazuh/custom-integrations/add_vtwazuh_config-agent.conf"
-    temp_config=$(mktemp)
-    cp "$CONFIG_AGENT_SNIPPET" "$temp_config"
-    sed -i "s|\$USECASE_DIR|$USECASE_DIR|" "$temp_config"
-    sudo bash -c "cat $temp_config >> /var/ossec/etc/ossec.conf"
-    rm "$temp_config"
-    sudo apt-get update -y >/dev/null && sudo apt-get install -y jq
-    sudo cp wazuh/custom-integrations/remove-threat.sh /var/ossec/active-response/bin/
+    CONFIG_AGENT="$(pwd)/wazuh/custom-integrations/add_vtwazuh_config-agent.conf"
+    cd wazuh/custom-integrations
+    sed -i "s|<directories report_changes=\"yes\" whodata=\"yes\" realtime=\"yes\">\$USECASE_DIR</directories>|<directories report_changes=\"yes\" whodata=\"yes\" realtime=\"yes\">$USECASE_DIR</directories>|" "$CONFIG_AGENT"
+    sudo bash -c "cat add_vtwazuh_config-agent.conf >> /var/ossec/etc/ossec.conf"
+    sudo apt update
+    sudo apt -y install jq
+    sudo cp remove-threat.sh /var/ossec/active-response/bin/
     sudo chmod 750 /var/ossec/active-response/bin/remove-threat.sh
     sudo chown root:wazuh /var/ossec/active-response/bin/remove-threat.sh
-    echo -e "\e[1;34m[INFO] Restarting Wazuh Agent...\e[0m"
     sudo systemctl restart wazuh-agent
     # Server Setup
     echo -n "Please enter your VirusTotal API Key: "
     read -r VT_API_KEY
-    CONFIG_SERVER_SNIPPET="$(pwd)/wazuh/custom-integrations/add_vtwazuh_config-server.conf"
-    sed -i "s|<api_key>.*</api_key>|<api_key>$VT_API_KEY</api_key>|" "$CONFIG_SERVER_SNIPPET"
-    cat "$CONFIG_SERVER_SNIPPET" >> "$(pwd)/wazuh/config/wazuh_cluster/wazuh_manager.conf"
-    cat wazuh/custom-integrations/add_vtwazuh_rules.xml >> wazuh/custom-integrations/final_local_rules.xml
-    echo -e "\e[1;32m VirusTotal configuration complete.\e[0m"
+    sed -i "s|<api_key>.*</api_key>|<api_key>$VT_API_KEY</api_key>|" "add_vtwazuh_config-server.conf"
+    cat add_vtwazuh_config-server.conf >> ../config/wazuh_cluster/wazuh_manager.conf
+    cat add_vtwazuh_rules.xml >> local_rules.xml
+    sudo cp local_rules.xml /var/lib/docker/volumes/wazuh_wazuh_etc/_data/rules/local_rules.xml
+    sudo docker exec -ti wazuh-wazuh.manager-1 chown wazuh:wazuh /var/ossec/etc/rules/local_rules.xml
+    sudo docker exec -ti wazuh-wazuh.manager-1 chmod 550 /var/ossec/etc/rules/local_rules.xml
+    cd .. && sudo docker compose restart && cd ..
+    echo -e "\e[1;32m VirusTotal-Wazuh integration complete.\e[0m"
     echo
 
     # --- 4. Shuffle <-> Wazuh Integration ---
     echo -e "\n\e[1;36m--- Configuring Shuffle <-> Wazuh --- \e[0m"
-    CONFIG_SNIPPET_SHUFFLE="$(pwd)/wazuh/custom-integrations/add_shufflewazuh_config.conf"
+    cd wazuh/custom-integrations
     echo -n "Please enter your Shuffle Webhook URL: "
     read -r SHUFFLE_URL
-    sed -i "s|<hook_url>.*</hook_url>|<hook_url>$SHUFFLE_URL</hook_url>|" "$CONFIG_SNIPPET_SHUFFLE"
-    cat "$CONFIG_SNIPPET_SHUFFLE" >> "$CONFIG_FILE"
-    echo -e "\e[1;32m Shuffle configuration staged.\e[0m"
+    sed -i "s|<hook_url>.*</hook_url>|<hook_url>$SHUFFLE_URL</hook_url>|" "add_shufflewazuh_config.conf"
+    cat add_shufflewazuh_config.conf >> ../config/wazuh_cluster/wazuh_manager.conf
+    cd .. && sudo docker compose restart && cd ..
+    echo -e "\e[1;32m Shuffle-Wazuh integration complete.\e[0m"
     echo
-
-    # --- 5. Finalize (MISP and VirusTotal Configuration) and Restart ---
-    echo -e "\n\e[1;36m--- Finalizing All Configurations --- \e[0m"
-    echo -e "\e[1;34m[INFO] Copying final rules file and setting permissions...\e[0m"
-    sudo cp wazuh/custom-integrations/final_local_rules.xml /var/lib/docker/volumes/wazuh_wazuh_etc/_data/rules/local_rules.xml
-    sudo docker exec -i wazuh-wazuh.manager-1 chown wazuh:wazuh /var/ossec/etc/rules/local_rules.xml
-    sudo docker exec -i wazuh-wazuh.manager-1 chmod 550 /var/ossec/etc/rules/local_rules.xml
-    echo
-
-    echo -e "\e[1;34m[INFO] All configurations applied. Restarting Wazuh to apply all changes...\e[0m"
-    cd wazuh && sudo docker compose restart && cd ..
     
-    echo -e "\n\e[1;32m🎉 All integrations have been configured successfully! \e[0m"
+    echo -e "\n\e[1;32m All integrations have been configured successfully! \e[0m"
     echo
 }
 
@@ -357,14 +352,15 @@ poc_menu() {
                     # --- PoC: Brute Force Detection ---
                     echo -e "\n\e[1;36m--- Simulating SSH Brute Force Attack --- \e[0m"
                     
-                    echo -e "\e[1;34m[INFO] This will simulate 10 failed login attempts to trigger Wazuh alerts.\e[0m"
+                    echo -e "\e[1;34m[INFO] This will simulate 10 failed login attempts to trigger Wazuh alerts. \e[1;33mSimply enter any value in the password field.\e[0m"
                     echo
-                    ssh fakeuser@$IP_ADDRESS
-                    echo -e "\e[1;34m[INFO] Target IP Address: $IP_ADDRESS\e[0m"
+                    IP=$(curl -s ip.me -4 || hostname -I | awk '{print $1}')
+                    ssh fakeuser@$IP
+                    echo -e "\e[1;34m[INFO] Target IP Address: $IP\e[0m"
                     for i in $(seq 1 10); do
                         echo "Simulating Brute Force: Attempt $i..."
                         # BatchMode=yes prevents password prompts, ensuring the attempt fails automatically
-                        ssh -o BatchMode=yes -o ConnectTimeout=5 "fakeuser@$IP_ADDRESS"
+                        ssh -o BatchMode=yes -o ConnectTimeout=5 "fakeuser@$IP"
                         sleep 1
                     done
                     
@@ -376,9 +372,9 @@ poc_menu() {
                     echo -e "\n\e[1;36m--- Simulating Malware Detection --- \e[0m"
                     echo -e "\e[1;34m[INFO] Downloading the EICAR test file. This is a HARMLESS file used to test antivirus software.\e[0m"
                     
-                    sudo curl -Lo /tmp/eicar.com https://secure.eicar.org/eicar.com
-                    echo -e "\e[1;34m[INFO] EICAR file downloaded to /tmp/eicar.com\e[0m"
-                    sudo ls -lah /tmp/eicar.com
+                    sudo curl -Lo /root/eicar.com https://secure.eicar.org/eicar.com && sudo ls -lah /root/eicar.com
+                    echo -e "\e[1;34m[INFO] EICAR file downloaded to /root/eicar.com\e[0m"
+                    echo
                     
                     echo -e "\n\e[1;32m Malware simulation complete. Check your Wazuh dashboard for alerts related to active response and VirusTotal.\e[0m"
                     break
@@ -386,18 +382,7 @@ poc_menu() {
                 3)
                     # --- PoC: Web Defacement Detection ---
                     echo -e "\n\e[1;36m--- Simulating Web Defacement --- \e[0m"
-                    
-                    # Check if the IP_ADDRESS variable from Step 2 exists
-                    if [ -z "$IP_ADDRESS" ]; then
-                        echo -e "\e[1;31m[ERROR] IP Address not set. Please run Step 2 (Install T-Guard SOC Package) first.\e[0m"
-                        break
-                    fi
-
-                    if ! command -v node > /dev/null; then
-                        echo -e "\e[1;31m[ERROR] Node.js is not installed. This PoC cannot run.\e[0m"
-                        break
-                    fi
-                    
+                                    
                     cd usecase/webdeface
                     sudo sed -i -e "s/(your_vm_ip)/$IP_ADDRESS/g" ./server.js
                     
